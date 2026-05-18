@@ -15,36 +15,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Dify 插件开发/打包环境要求 Python 3.12 [2](https://docs.dify.ai/zh/develop-plugin/dev-guides-and-walkthroughs/cheatsheet)[3](https://docs.dify.ai/zh/develop-plugin/dev-guides-and-walkthroughs/cheatsheet)
       - name: Setup Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      # Linux 下安装 Dify Plugin CLI：下载 dify-plugin-linux-amd64，chmod +x，运行 version 验证 [2](https://docs.dify.ai/zh/develop-plugin/dev-guides-and-walkthroughs/cheatsheet)[4](https://blog.csdn.net/qq_45229457/article/details/149447533)
       - name: Install Dify Plugin CLI (Linux amd64)
-        env:
-          DIFY_CLI_URL: ${{ vars.DIFY_CLI_URL }}
         run: |
           set -euxo pipefail
-          if [ -z "${DIFY_CLI_URL:-}" ]; then
-            echo "ERROR: Missing Actions variable DIFY_CLI_URL."
-            echo "Please set it in: Settings -> Secrets and variables -> Actions -> Variables"
-            exit 1
-          fi
-
-          curl -L "${DIFY_CLI_URL}" -o dify
+          curl -L "https://github.com/langgenius/dify-plugin-daemon/releases/latest/download/dify-plugin-linux-amd64" -o dify
           chmod +x dify
           ./dify version
 
-      # 打包命令：dify plugin package ./yourapp [2](https://docs.dify.ai/zh/develop-plugin/dev-guides-and-walkthroughs/cheatsheet)[3](https://docs.dify.ai/zh/develop-plugin/dev-guides-and-walkthroughs/cheatsheet)
-      # Tongyi 插件路径：models/tongyi [1](https://github.com/langgenius/dify-official-plugins/tree/main/models/tongyi)
       - name: Package Tongyi
         run: |
           set -euxo pipefail
           ./dify plugin package ./models/tongyi
 
-      # 上传打包产物：通常是 .difypkg（有些场景也可能产出 .zip）[2](https://docs.dify.ai/zh/develop-plugin/dev-guides-and-walkthroughs/cheatsheet)[3](https://docs.dify.ai/zh/develop-plugin/dev-guides-and-walkthroughs/cheatsheet)
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
