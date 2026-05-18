@@ -20,6 +20,7 @@ jobs:
         with:
           python-version: "3.12"
 
+      # 安装 Dify Plugin CLI（你之前已成功跑通）
       - name: Install Dify Plugin CLI (Linux amd64)
         run: |
           set -euxo pipefail
@@ -27,10 +28,24 @@ jobs:
           chmod +x dify
           ./dify version
 
+      # 关键修复：安装 uv（否则打包时会报找不到 uv）
+      # 工具链说明：uv 需要自行安装 [1](https://pkg.go.dev/github.com/langgenius/dify-plugin-daemon)
+      - name: Install uv
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install uv
+          uv --version
+
       - name: Package Tongyi
         run: |
           set -euxo pipefail
           ./dify plugin package ./models/tongyi
+
+      - name: List outputs (debug)
+        run: |
+          set -euxo pipefail
+          find . -maxdepth 4 -type f \( -name "*.difypkg" -o -name "*.zip" \) -ls || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
