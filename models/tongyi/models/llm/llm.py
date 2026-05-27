@@ -196,6 +196,15 @@ class TongyiLargeLanguageModel(LargeLanguageModel):
         if stop:
             extra_model_kwargs["stop"] = stop
 
+        enable_search = model_parameters.get("enable_search")
+        if enable_search:
+            search_params = {
+                "search_strategy": "max",
+                "forced_search": True
+            }
+            model_parameters["enable_search"] = True
+            model_parameters["search_options"] = [search_params]
+        
         response_format = model_parameters.get("response_format")
         if response_format:
             model_parameters["response_format"] = {"type": response_format}
